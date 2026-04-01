@@ -1,0 +1,72 @@
+name: Example ECS Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+# Example only:
+# - placeholder values are used below
+# - this workflow is not expected to run as-is
+# - real deployments should add environment protections, approvals,
+#   tighter IAM scoping, and proper secret management
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      AWS_REGION: eu-central-1
+      ECR_REPOSITORY: skypulse
+      ECS_CLUSTER: skypulse-prod-cluster
+      ECS_SERVICE: skypulse-prod-service
+      ECS_TASK_FAMILY: skypulse-prod-task
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t "$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
+          docker push "$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Render task definition
+        run: |
+          echo "This is only an example placeholder."
+          echo "In a real pipeline, render or patch the task definition JSON here."
+
+      - name: Deploy ECS service
+        run: |
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_SERVICE" \
+            --force-new-deployment

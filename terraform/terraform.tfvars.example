@@ -1,0 +1,9 @@
+#digitalocean_token = "replace-me"
+# This should come from your ENV
+
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... your-email@example.com"
+droplet_name = "docker-host"
+region       = "fra1"
+size         = "s-1vcpu-1gb"
+image        = "ubuntu-22-04-x64"
+tags         = ["docker", "terraform"]

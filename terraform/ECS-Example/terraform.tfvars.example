@@ -1,0 +1,8 @@
+aws_region             = "eu-central-1"
+vpc_id                 = "vpc-0123456789abcdef0"
+public_subnet_ids      = ["subnet-11111111111111111", "subnet-22222222222222222"]
+private_subnet_ids     = ["subnet-33333333333333333", "subnet-44444444444444444"]
+ecs_execution_role_arn = "arn:aws:iam::123456789012:role/skypulse-ecs-execution-role"
+ecs_task_role_arn      = "arn:aws:iam::123456789012:role/skypulse-task-role"
+container_image        = "123456789012.dkr.ecr.eu-central-1.amazonaws.com/skypulse:example"
+desired_count          = 2
